@@ -86,7 +86,7 @@ module AtomicWrapper {
 
   export function unsubscribeFontEvent() {
     for (var subscription in subscriptions)
-      (<eventKit.Disposable>subscription).dispose();
+      (<eventKit.Disposable>subscriptions[subscription]).dispose();
   }
 }
 
