@@ -1,9 +1,9 @@
 {
-  "name": "japanese-wrap",
-  "main": "./lib/japanese-wrap",
-  "version": "0.2.0",
+  "name": "AtomicChar",
+  "main": "./lib/atomic-wrapper.js",
+  "version": "0.1.0",
   "description": "Word wrap for Japanese text",
-  "repository": "https://github.com/raccy/japanese-wrap",
+  "repository": "https://github.com/SaschaNaz/AtomicChar",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
