@@ -71,8 +71,8 @@ module AtomicWrapper {
 
   function setFont(fontSize: number, fontFamily: string) {
     font.fontSize = fontSize || 16;
-    font.fontFamily = fontFamily || "Consolas";
-    return fontSize + "px " + fontFamily;
+    font.fontFamily = fontFamily.trim() || "Inconsolata, Monaco, Consolas, 'Courier New', Courier";
+    return font.fontSize + "px " + font.fontFamily;
   }
 
   export function subscribeFontEvent() {
