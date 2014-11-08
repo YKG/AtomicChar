@@ -12,7 +12,7 @@ declare module eventKit {
 declare module AtomCore {
   interface IDisplayBuffer {
     _nonatomic_findWrapColumn: (line: string, softWrapColumn: number) => number;
-    isSoftWrapped: boolean;
+    isSoftWrapped(): boolean;
     getClientWidth(): number;
   }
   interface IConfig {

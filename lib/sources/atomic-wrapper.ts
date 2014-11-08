@@ -58,7 +58,7 @@ module AtomicWrapper {
     displayBuffer._nonatomic_findWrapColumn = displayBuffer.findWrapColumn;
 
     displayBuffer.findWrapColumn = (line: string) => {
-      if (!displayBuffer.isSoftWrapped)
+      if (!displayBuffer.isSoftWrapped())
         return null;
 
       return wrap(line, displayBuffer.getWidth());
