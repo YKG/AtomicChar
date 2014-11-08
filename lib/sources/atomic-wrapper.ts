@@ -8,7 +8,10 @@ module AtomicWrapper {
   var subscriptions: { [key: string]: eventKit.Disposable } = {};
   //context.font = "16px NanumGothicCoding";
 
-  function wrap(line: string, width: number, spaceCutter: (line: string, softWrapColumn: number) => number): number {
+  /*space, CJK 4e00-, kana 3041-, hangul 1100-*/
+  var breakable = /[\s\u4e00-\u9fff\u3400-\u4dbf\u3041-\u309f\u30a1-\u30ff\u31f0-\u31ff\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/;
+
+  function wrap(line: string, width: number): number {
     if (context.measureText(line).width <= width)
       return null;
 
@@ -35,6 +38,22 @@ module AtomicWrapper {
     return spaceCutter(line, left);
   }
 
+  function spaceCutter(line: string, softWrapColumn: number) {
+    if (breakable.test(line[softWrapColumn])) {
+      var firstNonspace = line.slice(softWrapColumn).search(/\S/)
+      if (firstNonspace != -1)
+        return firstNonspace + softWrapColumn;
+      else
+        return line.length;
+    }
+    else {
+      for (var column = softWrapColumn; column >= 0; column--)
+        if (breakable.test(line[column]))
+          return column + 1;
+      return softWrapColumn;
+    }
+  }
+
   export function overwrite(displayBuffer: AtomCore.IDisplayBuffer) {
     displayBuffer._nonatomic_findWrapColumn = displayBuffer.findWrapColumn;
 
@@ -42,7 +61,7 @@ module AtomicWrapper {
       if (!displayBuffer.isSoftWrapped)
         return null;
 
-      return wrap(line, displayBuffer.getWidth(), displayBuffer._nonatomic_findWrapColumn.bind(displayBuffer));
+      return wrap(line, displayBuffer.getWidth());
     }
   }
   export function revert(displayBuffer: AtomCore.IDisplayBuffer) {
