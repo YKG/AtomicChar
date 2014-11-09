@@ -96,6 +96,7 @@ export var activate = (state: AtomCore.IAtomState) => {
     (editorView) => {
       var editor = editorView.getEditor();
       AtomicWrapper.overwrite(editor.displayBuffer);
+      editor.displayBuffer.updateWrappedScreenLines();
     });
 }
 
@@ -105,5 +106,6 @@ export var deactivate = () => {
     (editorView) => {
       var editor = editorView.getEditor();
       AtomicWrapper.revert(editor.displayBuffer);
+      editor.displayBuffer.updateWrappedScreenLines();
     });
 }
