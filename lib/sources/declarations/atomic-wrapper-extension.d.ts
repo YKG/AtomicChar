@@ -1,4 +1,4 @@
-///<reference﻿ path="DefinitelyTyped/atom/atom.d.ts" />
+///<reference﻿ path="../DefinitelyTyped/atom/atom.d.ts" />
 
 declare module eventKit {
   class Disposable {

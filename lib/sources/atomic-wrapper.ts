@@ -1,5 +1,5 @@
 ///<reference﻿ path="DefinitelyTyped/atom/atom.d.ts" />
-///<reference﻿ path="atomic-wrapper-extension.d.ts" />
+///<reference﻿ path="declarations/atomic-wrapper-extension.d.ts" />
 
 module AtomicWrapper {
   var canvas = document.createElement("canvas");
@@ -92,12 +92,10 @@ module AtomicWrapper {
 
 export var activate = (state: AtomCore.IAtomState) => {
   AtomicWrapper.subscribeFontEvent();
-  atom.workspaceView.eachEditorView(
-    (editorView) => {
-      var editor = editorView.getEditor();
-      AtomicWrapper.overwrite(editor.displayBuffer);
-      editor.displayBuffer.updateWrappedScreenLines();
-    });
+  atom.workspace.eachEditor((editor: AtomCore.IEditor) => {
+    AtomicWrapper.overwrite(editor.displayBuffer);
+    editor.displayBuffer.updateWrappedScreenLines();
+  });
 }
 
 export var deactivate = () => {

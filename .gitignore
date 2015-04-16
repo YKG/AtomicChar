@@ -1,3 +1,8 @@
+lib/sources/*.d.ts
+lib/sources/*.js
+lib/sources/*.js.map
+!lib/sources/declarations
+
 .DS_Store
 npm-debug.log
 node_modules
