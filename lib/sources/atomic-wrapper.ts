@@ -2,6 +2,9 @@
 ///<reference﻿ path="declarations/atomic-wrapper-extension.d.ts" />
 
 module AtomicWrapper {
+  var TokenizedLine = require("src/tokenized-line");
+  var DisplayBuffer = require("src/display-buffer");
+
   var canvas = document.createElement("canvas");
   var context = canvas.getContext("2d");
   var font: { fontFamily: string; fontSize: number } = <any>{};
@@ -54,19 +57,28 @@ module AtomicWrapper {
     }
   }
 
-  export function overwrite(displayBuffer: AtomCore.IDisplayBuffer) {
-    displayBuffer._nonatomic_findWrapColumn = displayBuffer.findWrapColumn;
+  export function overwrite() {
+    TokenizedLine.prototype._nonatomic_findWrapColumn = TokenizedLine.prototype.findWrapColumn;
 
-    displayBuffer.findWrapColumn = (line: string) => {
-      if (!displayBuffer.isSoftWrapped())
+    // This changes the meaning of findWrapColumn; original one receives maxColumn
+    TokenizedLine.prototype.findWrapColumn = function (lineWidth: number) {
+      if (!lineWidth)
         return null;
+      return wrap(this.text, lineWidth);
+    }
 
-      return wrap(line, displayBuffer.getWidth());
+    // This changes the meaning of getSoftWrapColumn; original one gives getEditorWidthInChars
+    DisplayBuffer.prototype._nonatomic_getSoftWrapColumn = DisplayBuffer.prototype.getSoftWrapColumn;
+    DisplayBuffer.prototype.getSoftWrapColumn = function () {
+      return (<AtomCore.IDisplayBuffer>this).getWidth();
     }
   }
-  export function revert(displayBuffer: AtomCore.IDisplayBuffer) {
-    displayBuffer.findWrapColumn = displayBuffer._nonatomic_findWrapColumn;
-    displayBuffer._nonatomic_findWrapColumn = null;
+  export function revert() {
+    TokenizedLine.prototype.findWrapColumn = TokenizedLine.prototype._nonatomic_findWrapColumn;
+    TokenizedLine.prototype._nonatomic_findWrapColumn = null;
+
+    DisplayBuffer.prototype.getSoftWrapColumn = DisplayBuffer.prototype._nonatomic_getSoftWrapColumn;
+    DisplayBuffer.prototype._nonatomic_getSoftWrapColumn = null;
   }
 
   function setFont(fontSize: number, fontFamily: string) {
@@ -92,18 +104,18 @@ module AtomicWrapper {
 
 export var activate = (state: AtomCore.IAtomState) => {
   AtomicWrapper.subscribeFontEvent();
+  AtomicWrapper.overwrite();
+
   atom.workspace.eachEditor((editor: AtomCore.IEditor) => {
-    AtomicWrapper.overwrite(editor.displayBuffer);
     editor.displayBuffer.updateWrappedScreenLines();
   });
 }
 
 export var deactivate = () => {
   AtomicWrapper.unsubscribeFontEvent();
-  atom.workspaceView.eachEditorView(
-    (editorView) => {
-      var editor = editorView.getEditor();
-      AtomicWrapper.revert(editor.displayBuffer);
-      editor.displayBuffer.updateWrappedScreenLines();
-    });
+  AtomicWrapper.revert();
+
+  atom.workspace.eachEditor((editor: AtomCore.IEditor) => {
+    editor.displayBuffer.updateWrappedScreenLines();
+  });
 }
