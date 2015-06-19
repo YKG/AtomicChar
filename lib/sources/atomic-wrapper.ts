@@ -106,7 +106,7 @@ export var activate = (state: AtomCore.IAtomState) => {
   AtomicWrapper.subscribeFontEvent();
   AtomicWrapper.overwrite();
 
-  atom.workspace.eachEditor((editor: AtomCore.IEditor) => {
+  (<any>atom.workspace).observeTextEditors((editor: AtomCore.IEditor) => {
     editor.displayBuffer.updateWrappedScreenLines();
   });
 }
@@ -115,7 +115,7 @@ export var deactivate = () => {
   AtomicWrapper.unsubscribeFontEvent();
   AtomicWrapper.revert();
 
-  atom.workspace.eachEditor((editor: AtomCore.IEditor) => {
+  (<any>atom.workspace).observeTextEditors((editor: AtomCore.IEditor) => {
     editor.displayBuffer.updateWrappedScreenLines();
   });
 }
