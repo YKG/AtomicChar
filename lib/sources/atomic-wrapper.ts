@@ -19,12 +19,12 @@ module AtomicWrapper {
       return null;
 
     // Break the text to get proper width, by binary search algorithm.
-    var left = 0;
-    var right = line.length;
+    let left = 0;
+    let right = line.length;
     while (left < right) {
-      var middle = (left + right) / 2;
-      var slice = line.slice(0, middle);
-      var measure = context.measureText(slice);
+      let middle = (left + right) / 2;
+      let slice = line.slice(0, middle);
+      let measure = context.measureText(slice);
       if (measure.width === width)
         return spaceCutter(line, slice.length);
       else if (measure.width < width)
@@ -43,14 +43,14 @@ module AtomicWrapper {
 
   function spaceCutter(line: string, softWrapColumn: number) {
     if (breakable.test(line[softWrapColumn])) {
-      var firstNonspace = line.slice(softWrapColumn).search(/\S/)
+      let firstNonspace = line.slice(softWrapColumn).search(/\S/)
       if (firstNonspace != -1)
         return firstNonspace + softWrapColumn;
       else
         return line.length;
     }
     else {
-      for (var column = softWrapColumn; column >= 0; column--)
+      for (let column = softWrapColumn; column >= 0; column--)
         if (breakable.test(line[column]))
           return column + 1;
       return softWrapColumn;
@@ -70,7 +70,20 @@ module AtomicWrapper {
     // This changes the meaning of getSoftWrapColumn; original one gives getEditorWidthInChars
     DisplayBuffer.prototype._nonatomic_getSoftWrapColumn = DisplayBuffer.prototype.getSoftWrapColumn;
     DisplayBuffer.prototype.getSoftWrapColumn = function () {
-      return (<AtomCore.IDisplayBuffer>this).getWidth();
+      return this.atmcGetSoftWrapWidth();
+    }
+
+    DisplayBuffer.prototype.atmcGetEditorWidth = function () {
+      let width = this.width != null ? this.width : this.getScrollWidth();
+      return width - this.getVerticalScrollbarWidth();
+    }
+
+    DisplayBuffer.prototype.atmcGetSoftWrapWidth = function () {
+      if (this.configSettings.softWrapAtPreferredLineLength) {
+        return Math.min(this.atmcGetEditorWidth(), this.configSettings.preferredLineLength * this.defaultCharWidth);
+      }
+      else
+        return this.atmcGetEditorWidth();
     }
   }
   export function revert() {
@@ -79,6 +92,9 @@ module AtomicWrapper {
 
     DisplayBuffer.prototype.getSoftWrapColumn = DisplayBuffer.prototype._nonatomic_getSoftWrapColumn;
     DisplayBuffer.prototype._nonatomic_getSoftWrapColumn = null;
+
+    delete DisplayBuffer.atmcGetEditorWidth;
+    delete DisplayBuffer.atmcGetSoftWrapWidth;
   }
 
   function setFont(fontSize: number, fontFamily: string) {
